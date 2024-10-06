@@ -727,6 +727,13 @@ static CommandCost ClearTile_Town(TileIndex tile, DoCommandFlag flags)
 	int rating = hs->remove_rating_decrease;
 	Town *t = Town::GetByTile(tile);
 
+	/* In the case where the cost of clearing a house tile is higher
+	 * than the maximum rating (e.g. through NewGRFs), prevent tile
+	 * from being removed regardless of the tolerance level. */
+	if (rating > RATING_MAXIMUM) {
+		return_cmd_error(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS);
+	}
+
 	if (Company::IsValidID(_current_company)) {
 		if (rating > t->ratings[_current_company] && !(flags & DC_NO_TEST_TOWN_RATING) &&
 				!_cheats.magic_bulldozer.value && _settings_game.difficulty.town_council_tolerance != TOWN_COUNCIL_PERMISSIVE) {
