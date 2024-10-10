@@ -227,6 +227,15 @@ Money HouseSpec::GetRemovalCost() const
 	return (_price[PR_CLEAR_HOUSE] * this->removal_cost) >> 8;
 }
 
+/**
+* Gets if house is destructible by the player
+* @return Boolean if the house is destructible
+ */
+bool HouseSpec::IsDestructible() const
+{
+	return (remove_rating_decrease <= 1000) && !(extra_flags & BUILDING_IS_PERMANENT);
+}
+
 /* Local */
 static int _grow_town_result;
 
@@ -728,10 +737,15 @@ static CommandCost ClearTile_Town(TileIndex tile, DoCommandFlag flags)
 	Town *t = Town::GetByTile(tile);
 
 	if (Company::IsValidID(_current_company)) {
-		if (rating > t->ratings[_current_company] && !(flags & DC_NO_TEST_TOWN_RATING) &&
-				!_cheats.magic_bulldozer.value && _settings_game.difficulty.town_council_tolerance != TOWN_COUNCIL_PERMISSIVE) {
-			SetDParam(0, t->index);
-			return_cmd_error(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS);
+		if (!_cheats.magic_bulldozer.value) {
+			if (!hs->IsDestructible()) {
+				SetDParam(0, t->index);
+				return_cmd_error(CMD_ERROR);
+			}
+			else if (rating > t->ratings[_current_company] &&  _settings_game.difficulty.town_council_tolerance != TOWN_COUNCIL_PERMISSIVE && !(flags & DC_NO_TEST_TOWN_RATING)) {
+				SetDParam(0, t->index);
+				return_cmd_error(STR_ERROR_LOCAL_AUTHORITY_REFUSES_TO_ALLOW_THIS);
+			}
 		}
 	}
 
