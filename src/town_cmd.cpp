@@ -233,7 +233,7 @@ Money HouseSpec::GetRemovalCost() const
  */
 bool HouseSpec::IsDestructible() const
 {
-	return (remove_rating_decrease <= 1000) && !(extra_flags & BUILDING_IS_PERMANENT);
+	return (remove_rating_decrease <= MAX_REMOVE_RATING) && !(extra_flags & BUILDING_IS_PERMANENT);
 }
 
 /* Local */

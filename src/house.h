@@ -84,9 +84,9 @@ enum HouseExtraFlags : uint8_t {
 	NO_EXTRA_FLAG            =       0,
 	BUILDING_IS_HISTORICAL   = 1U << 0,  ///< this house will only appear during town generation in random games, thus the historical
 	BUILDING_IS_PROTECTED    = 1U << 1,  ///< towns and AI will not remove this house, while human players will be able to
-	BUILDING_IS_PERMANENT   = 1U << 2,  ///< these buildings cannot be demolished by the player. Same as setting rating over 1000
-	SYNCHRONISED_CALLBACK_1B = 1U << 3,  ///< synchronized callback 1B will be performed, on multi tile houses
-	CALLBACK_1A_RANDOM_BITS  = 1U << 4,  ///< callback 1A needs random bit
+	SYNCHRONISED_CALLBACK_1B = 1U << 2,  ///< synchronized callback 1B will be performed, on multi tile houses
+	CALLBACK_1A_RANDOM_BITS  = 1U << 3,  ///< callback 1A needs random bit
+	BUILDING_IS_PERMANENT = 1U << 4,  ///< these buildings cannot be demolished by the player. Same as setting rating over 1000
 };
 
 DECLARE_ENUM_AS_BIT_SET(HouseExtraFlags)
@@ -123,6 +123,7 @@ struct HouseSpec {
 	Money GetRemovalCost() const;
 	bool IsDestructible() const;
 
+	const static int MAX_REMOVE_RATING = 1000;
 	static std::vector<HouseSpec> &Specs();
 	static HouseSpec *Get(size_t house_id);
 };
