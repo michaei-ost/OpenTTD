@@ -90,6 +90,19 @@ static WindowDesc _ai_config_desc(
 );
 
 /**
+ * Helper function to check if a given AI slot is editable.
+ * @param slot The slot to check.
+ * @return True if the AI slot can be edited, otherwise false.
+ */
+bool IsEditable(CompanyID slot)
+{
+    if (_game_mode != GM_NORMAL) {
+        return slot > 0 && slot < MAX_COMPANIES;
+    }
+    return slot < MAX_COMPANIES && !Company::IsValidID(slot);
+}
+
+/**
  * Window to configure which AIs will start.
  */
 struct AIConfigWindow : public Window {
@@ -203,14 +216,11 @@ struct AIConfigWindow : public Window {
 		}
 	}
 
-	void OnClick([[maybe_unused]] Point pt, WidgetID widget, [[maybe_unused]] int click_count) override
-	{
-		if (widget >= WID_AIC_TEXTFILE && widget < WID_AIC_TEXTFILE + TFT_CONTENT_END) {
-			if (this->selected_slot == INVALID_COMPANY || AIConfig::GetConfig(this->selected_slot) == nullptr) return;
-
-			ShowScriptTextfileWindow((TextfileType)(widget - WID_AIC_TEXTFILE), this->selected_slot);
-			return;
-		}
+    void OnClick([[maybe_unused]] Point pt, WidgetID widget, [[maybe_unused]] int click_count) override
+    {
+        if (_shift_pressed) {
+            return;
+        }
 
 		switch (widget) {
 			case WID_AIC_DECREASE_NUMBER:
@@ -226,25 +236,12 @@ struct AIConfigWindow : public Window {
 				break;
 			}
 
-			case WID_AIC_DECREASE_INTERVAL:
-			case WID_AIC_INCREASE_INTERVAL: {
-				int new_value;
-				if (widget == WID_AIC_DECREASE_INTERVAL) {
-					new_value = std::max(static_cast<int>(MIN_COMPETITORS_INTERVAL), GetGameSettings().difficulty.competitors_interval - 1);
-				} else {
-					new_value = std::min(static_cast<int>(MAX_COMPETITORS_INTERVAL), GetGameSettings().difficulty.competitors_interval + 1);
-				}
-				IConsoleSetSetting("difficulty.competitors_interval", new_value);
-				this->InvalidateData();
-				break;
-			}
-
-			case WID_AIC_LIST: { // Select a slot
-				this->selected_slot = (CompanyID)this->vscroll->GetScrolledRowFromWidget(pt.y, this, widget);
-				this->InvalidateData();
-				if (click_count > 1 && IsEditable(this->selected_slot)) ShowScriptListWindow((CompanyID)this->selected_slot, _ctrl_pressed);
-				break;
-			}
+            case WID_AIC_LIST: {
+                this->selected_slot = (CompanyID)this->vscroll->GetScrolledRowFromWidget(pt.y, this, widget);
+                this->InvalidateData();
+                if (click_count > 1 && IsEditable(this->selected_slot)) ShowScriptListWindow((CompanyID)this->selected_slot, _ctrl_pressed);
+                break;
+            }
 
 			case WID_AIC_MOVE_UP:
 				if (IsEditable(this->selected_slot) && IsEditable((CompanyID)(this->selected_slot - 1))) {
@@ -326,4 +323,3 @@ void ShowAIConfigWindow()
 	CloseWindowByClass(WC_GAME_OPTIONS);
 	new AIConfigWindow();
 }
-
