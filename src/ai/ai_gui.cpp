@@ -326,4 +326,3 @@ void ShowAIConfigWindow()
 	CloseWindowByClass(WC_GAME_OPTIONS);
 	new AIConfigWindow();
 }
-
